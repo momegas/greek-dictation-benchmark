@@ -1,0 +1,762 @@
+<title>Greek Dictation Benchmark</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  /* Brand & surface — DESIGN.md "Colors" */
+  --primary:#181d26; --primary-active:#0d1218;
+  --canvas:#ffffff; --surface-soft:#f8fafc; --surface-strong:#e0e2e6;
+  --surface-dark:#181d26; --hairline:#dddddd;
+  /* Text */
+  --ink:#181d26; --body:#333840; --muted:#41454d; --on-dark:#ffffff;
+  --border-strong:#9297a0;
+  /* Signature card surfaces — brand voltage, used full-bleed only */
+  --coral:#aa2d00; --forest:#0a2e0e; --cream:#f5e9d4;
+  --peach:#fcab79; --mint:#a8d8c4; --yellow:#f4d35e; --mustard:#d9a441;
+  /* Semantic */
+  --link:#1b61c9; --info:#254fad; --info-border:#458fff;
+  --success:#006400; --success-border:#39bf45;
+  /* Spacing — 4px base */
+  --xxs:4px; --xs:8px; --sm:12px; --md:16px; --lg:24px; --xl:32px; --xxl:48px; --section:96px;
+  /* Radii */
+  --r-xs:2px; --r-sm:6px; --r-md:10px; --r-lg:12px; --r-full:9999px;
+  --font:"Inter Display","Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+*{box-sizing:border-box}
+/* Light-only by design (DESIGN.md: dark mode out of scope). Painted explicitly so the
+   page never borrows a dark host ground. */
+html{background:var(--canvas)}
+body{margin:0;background:var(--canvas);color:var(--body);font-family:var(--font);
+  font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1280px;margin:0 auto;padding:0 var(--xxl)}
+@media (max-width:768px){.wrap{padding:0 var(--lg)}}
+
+/* Type scale — display weights stay 400/500, never bold */
+h1,h2,h3,h4{margin:0;color:var(--ink);font-weight:400}
+h1{font-size:40px;line-height:1.2;letter-spacing:0}
+h2{font-size:32px;line-height:1.2}
+h3{font-size:24px;line-height:1.35;letter-spacing:.12px}
+h4{font-size:16px;line-height:1.4;font-weight:500}
+p{margin:0}
+code{font-family:var(--mono);font-size:.9em}
+a{color:var(--link);text-decoration:none}
+.lede{font-size:20px;line-height:1.5;color:var(--body);max-width:62ch}
+.cap{font-size:14px;font-weight:500;line-height:1.35;letter-spacing:.16px;color:var(--muted)}
+.eyebrow{font-size:14px;font-weight:500;letter-spacing:.16px;color:var(--muted);
+  text-transform:uppercase}
+.mono-s{font-family:var(--mono);font-size:12px;color:var(--muted)}
+
+/* Editorial bands — 96px rhythm, surface mode alternates between bands */
+.band{padding:var(--section) 0}
+.band-soft{background:var(--surface-soft)}
+.band-tight{padding:var(--xxl) 0}
+.hero-band{padding:var(--section) 0 var(--xxl)}
+.hero-band h1{max-width:20ch}
+.facts{display:flex;flex-wrap:wrap;gap:var(--xs) var(--xl);margin-top:var(--lg);
+  font-family:var(--mono);font-size:12px;color:var(--muted)}
+.facts b{color:var(--ink);font-weight:600}
+
+/* Signature cards — full-bleed colour, 48px padding, flat (colour-block first) */
+.sig{border-radius:var(--r-lg);padding:var(--xxl);color:var(--on-dark)}
+.sig-dark{background:var(--surface-dark)}
+.sig-coral{background:var(--coral)}
+.sig-forest{background:var(--forest)}
+.sig h2,.sig h3,.sig h4{color:var(--on-dark)}
+.sig .cap{color:rgba(255,255,255,.72)}
+.cream{background:var(--cream);border-radius:var(--r-md);padding:var(--lg);color:var(--ink)}
+.cream h3,.cream h4{color:var(--ink)}
+
+/* Stat rows inside signature cards */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:var(--lg);margin-top:var(--xl)}
+.stat dt{font-size:14px;font-weight:500;letter-spacing:.16px;color:rgba(255,255,255,.72)}
+.stat dd{margin:var(--xxs) 0 0;font-family:var(--mono);font-size:28px;font-weight:400;
+  color:var(--on-dark);font-variant-numeric:tabular-nums}
+.cream .stat dt{color:var(--muted)}
+.cream .stat dd{color:var(--ink)}
+
+/* Findings list — numbers encode a real sequence of conclusions */
+.findings{margin:var(--xl) 0 0;padding:0;list-style:none;display:grid;gap:var(--md)}
+.findings li{display:grid;grid-template-columns:auto 1fr;gap:var(--md);align-items:start}
+.fnum{font-family:var(--mono);font-size:12px;color:rgba(255,255,255,.72);
+  border:1px solid rgba(255,255,255,.28);border-radius:var(--r-xs);padding:2px 6px;margin-top:2px}
+
+/* Tables — hairline dividers, no shadow */
+.scroll{overflow-x:auto;margin-top:var(--lg);border:1px solid var(--hairline);
+  border-radius:var(--r-md);background:var(--canvas)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:10px var(--md);border-bottom:1px solid var(--hairline);
+  white-space:nowrap;vertical-align:middle;line-height:1.4}
+thead th{font-size:14px;font-weight:500;letter-spacing:.16px;color:var(--muted);
+  background:var(--surface-soft)}
+tbody tr:last-child td{border-bottom:none}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
+.hero-n{font-weight:500;color:var(--ink)}
+/* First column carries the model id and should not be squeezed by the numeric columns. */
+tbody td:first-child,tbody td:nth-child(2){white-space:nowrap}
+thead th.num{text-align:right}
+/* A prose column inside an otherwise numeric table: let it wrap, and give it the width to
+   do so in one or two lines rather than four. */
+.wrap-cell{white-space:normal;min-width:34ch;line-height:1.45}
+.rank{font-family:var(--mono);color:var(--muted);width:1%}
+.tag{font-size:12px;font-weight:500;background:var(--primary);color:var(--on-dark);
+  padding:2px 8px;border-radius:var(--r-xs);margin-left:var(--xs)}
+.tag.ext{background:var(--mustard);color:var(--ink)}
+/* Severity via a left rule + ink weight, not a colour wash on the row */
+tr.b-good td:first-child{box-shadow:inset 3px 0 0 var(--success-border)}
+tr.b-warn td:first-child{box-shadow:inset 3px 0 0 var(--mustard)}
+tr.b-bad td:first-child{box-shadow:inset 3px 0 0 var(--coral)}
+.c-good{color:var(--success);font-weight:500}
+.c-warn{color:var(--mustard);font-weight:500}
+.c-bad{color:var(--coral);font-weight:500}
+.d-worse{color:var(--coral);font-weight:500}
+.d-better{color:var(--success);font-weight:500}
+tr.ctl{background:var(--surface-soft)}
+tr.dim td{color:var(--border-strong)}
+.plus{color:var(--muted)}
+.pill{font-size:12px;font-weight:500;padding:2px 8px;border-radius:var(--r-xs)}
+.p-ok{background:var(--success);color:var(--on-dark)}
+.p-no{background:var(--surface-strong);color:var(--muted)}
+
+/* Evidence rows — cream/peach demo-card surfaces, uneven by content */
+.evidence{list-style:none;margin:var(--lg) 0 0;padding:0;display:grid;gap:var(--sm)}
+.ev{border-radius:var(--r-md);padding:var(--md);display:grid;gap:var(--xs);
+  grid-template-columns:minmax(170px,220px) 1fr auto;align-items:center;
+  border:1px solid var(--hairline);background:var(--canvas)}
+.ev.ok{background:var(--mint);border-color:transparent}
+.ev.no{background:var(--peach);border-color:transparent}
+.evm{font-family:var(--mono);font-size:12px;color:var(--ink)}
+.evt{font-size:16px;color:var(--ink)}
+.evb{font-size:12px;font-weight:500;padding:2px 8px;border-radius:var(--r-xs);
+  white-space:nowrap;background:rgba(24,29,38,.12);color:var(--ink)}
+.refline{margin-top:var(--md);padding-left:var(--md);border-left:2px solid var(--hairline);
+  color:var(--muted);font-size:14px}
+
+/* Grids — card heights deliberately uneven */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:var(--lg);margin-top:var(--lg);align-items:start}
+.card{background:var(--canvas);border:1px solid var(--hairline);
+  border-radius:var(--r-md);padding:var(--lg)}
+.card.soft{background:var(--surface-soft);border-color:transparent}
+.card h4{margin-bottom:var(--xs)}
+
+/* Diagrams */
+figure{margin:var(--lg) 0 0}
+figure svg{display:block;width:100%;height:auto}
+figcaption{margin-top:var(--sm);font-size:14px;font-weight:500;letter-spacing:.16px;
+  color:var(--muted)}
+.diagram{background:var(--surface-soft);border-radius:var(--r-md);padding:var(--lg)}
+.sig .diagram{background:rgba(255,255,255,.07)}
+
+/* Metric definitions.
+   A native title="" tooltip waits a second or two, never fires on touch, and is invisible
+   inside a sandboxed iframe — so the definition is rendered as a real element instead.
+   Shown on hover AND focus, and the trigger is a real button element so keyboard and screen-reader
+   users reach it the same way. */
+.m{position:relative;display:inline-block;border:0;padding:0;margin:0;background:none;
+  font:inherit;color:inherit;cursor:help;
+  border-bottom:1px dotted var(--border-strong);line-height:inherit}
+.m::after{
+  content:attr(data-def);
+  position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);
+  width:max-content;max-width:min(300px,70vw);white-space:normal;text-align:left;
+  background:var(--surface-dark);color:var(--on-dark);
+  font-size:12.5px;font-weight:400;line-height:1.45;letter-spacing:0;
+  padding:10px 12px;border-radius:var(--r-sm);
+  opacity:0;visibility:hidden;pointer-events:none;z-index:50;
+  box-shadow:0 6px 24px -8px rgba(24,29,38,.45)}
+.m::before{
+  content:"";position:absolute;left:50%;bottom:calc(100% + 3px);transform:translateX(-50%);
+  border:5px solid transparent;border-top-color:var(--surface-dark);
+  opacity:0;visibility:hidden;pointer-events:none;z-index:51}
+.m:hover::after,.m:focus-visible::after,.m:hover::before,.m:focus-visible::before{
+  opacity:1;visibility:visible}
+/* A centred bubble clips at either page edge, so the first and last columns anchor their
+   bubble to the near edge instead of centring it. */
+.m.right::after{left:auto;right:0;transform:none}
+.m.right::before{left:auto;right:12px;transform:none}
+.m.left::after{left:0;right:auto;transform:none}
+.m.left::before{left:12px;right:auto;transform:none}
+thead .m{color:var(--muted)}
+.sig .m{border-bottom-color:rgba(255,255,255,.5)}
+.sig .m::after{background:var(--canvas);color:var(--ink);
+  box-shadow:0 6px 24px -8px rgba(0,0,0,.5)}
+.sig .m::before{border-top-color:var(--canvas)}
+/* Chapter brief: question + method, before any numbers. */
+.brief{margin-top:var(--lg);border-left:2px solid var(--hairline);padding-left:var(--md);
+  display:grid;gap:var(--sm);max-width:76ch}
+.brief-row{display:grid;grid-template-columns:78px 1fr;gap:var(--md);align-items:start}
+.brief-k{font-size:12px;font-weight:500;letter-spacing:.6px;text-transform:uppercase;
+  color:var(--muted);padding-top:2px}
+.brief-row p{font-size:14px;color:var(--body)}
+/* The one-sentence answer a chapter earned. */
+.finding{margin-top:var(--lg);padding:var(--md) var(--lg);background:var(--surface-soft);
+  border-left:3px solid var(--primary);border-radius:0 var(--r-sm) var(--r-sm) 0;
+  font-size:16px;color:var(--ink);max-width:76ch}
+.finding b{font-weight:600}
+.note{color:var(--muted);font-size:14px;margin-top:var(--md);max-width:74ch}
+.prose{max-width:70ch}
+ol.caveats{margin:var(--md) 0 0;padding-left:var(--lg);display:grid;gap:var(--sm)}
+pre{background:var(--surface-dark);color:var(--on-dark);border-radius:var(--r-md);
+  padding:var(--lg);overflow-x:auto;font-family:var(--mono);font-size:12px;
+  line-height:1.8;margin:var(--lg) 0 0}
+pre .c{color:rgba(255,255,255,.55)}
+footer{border-top:1px solid var(--hairline);padding:var(--xl) 0;color:var(--muted);font-size:14px}
+:focus-visible{outline:2px solid var(--info-border);outline-offset:2px}
+@media (max-width:768px){
+  h1{font-size:32px}h2{font-size:26px}h3{font-size:20px}
+  .band{padding:var(--xxl) 0}
+  .sig{padding:var(--lg)}
+  .ev{grid-template-columns:1fr}
+  .evb{justify-self:start}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+<div class="wrap">
+<div class="hero-band"><div class="wrap">
+<p class="eyebrow">Round two · shortlist</p>
+<h1 style="margin-top:var(--md)">Which model actually dictates Greek?</h1>
+<p class="lede" style="margin-top:var(--lg)">6 speech-to-text engines and
+6 language models — the survivors of a wider first round — tested on
+100 longer passages from eleven business functions, in 12 voices across two
+speech providers.</p>
+<div class="facts">
+<span><b>100</b> passages</span>
+<span><b>998s</b> audio</span>
+<span><b>10.0s</b> mean length</span>
+<span><b>11</b> departments</span>
+<span><b>12</b> voices</span>
+</div>
+</div></div>
+
+<div class="band-tight"><div class="wrap">
+<div class="sig sig-dark">
+<p class="cap">Recommendation</p>
+<h2 style="margin-top:var(--xs)">openai/gpt-4o-transcribe</h2>
+<p class="cap" style="margin-top:var(--xs)">still the pick, but the margin narrows on real-length dictation</p>
+<dl class="stats">
+<div class="stat"><dt><button type="button" class="m left" data-def="Critical Entity Error Rate. Share of must-get-right terms the model lost — ΦΠΑ, amounts, dates, names. The ranking key: a mangled tax acronym matters more than a fumbled function word." aria-label="CEER: Critical Entity Error Rate. Share of must-get-right terms the model lost — ΦΠΑ, amounts, dates, names. The ranking key: a mangled tax acronym matters more than a fumbled function word.">CEER</button></dt><dd>19.3%</dd></div>
+<div class="stat"><dt><button type="button" class="m" data-def="Word Error Rate. Insertions + deletions + substitutions, divided by reference length, after Unicode normalization (NFC, final-sigma folded). Lower is better." aria-label="WER: Word Error Rate. Insertions + deletions + substitutions, divided by reference length, after Unicode normalization (NFC, final-sigma folded). Lower is better.">WER</button></dt><dd>8.8%</dd></div>
+<div class="stat"><dt><button type="button" class="m" data-def="Median latency. Half of requests finish faster than this. Measured after discarding one cold call per model." aria-label="p50: Median latency. Half of requests finish faster than this. Measured after discarding one cold call per model.">p50</button></dt><dd>1616ms</dd></div>
+<div class="stat"><dt>Per audio-hour</dt><dd>$0.090</dd></div>
+</dl>
+<ol class="findings">
+<li><span class="fnum">01</span><span>Figures are the whole difficulty. On prose this engine
+loses 2.9% of critical terms; on passages containing amounts, tax numbers
+and percentages it loses <b>36.3%</b> — more than ten times as many.</span></li>
+<li><span class="fnum">02</span><span>Longer, department-specific dictation is markedly harder
+than the short utterances of round one. The same engine scored 1.3% there and
+19.3% here.</span></li>
+<li><span class="fnum">03</span><span>The ranking is stable but compressed: the top four
+engines now sit within 6.3% of each other, so cost and
+latency matter more than they did.</span></li>
+</ol>
+</div>
+<p class="note">Runner-up <code>openai/whisper-1</code> at 20.6%
+<button type="button" class="m" data-def="Critical Entity Error Rate. Share of must-get-right terms the model lost — ΦΠΑ, amounts, dates, names. The ranking key: a mangled tax acronym matters more than a fumbled function word." aria-label="CEER: Critical Entity Error Rate. Share of must-get-right terms the model lost — ΦΠΑ, amounts, dates, names. The ranking key: a mangled tax acronym matters more than a fumbled function word.">CEER</button>. Every engine here cleared a first round; none is a fresh candidate.</p>
+</div></div>
+
+<div class="band band-soft"><div class="wrap">
+<p class="eyebrow">Chapter 1</p>
+<h2 style="margin-top:var(--xs)">Why these models and not others</h2>
+<div class="brief">
+<div class="brief-row"><span class="brief-k">Question</span><p>This is a <b>shortlist</b>. A first round screened 7 transcription
+   engines and 12 language models on 40 short
+   utterances averaging 4.5 seconds. Carrying every candidate forward
+   would have spent most of the budget re-confirming known failures, so only the survivors
+   are tested here — which also means these numbers cannot be read as a full-field ranking.</p></div>
+<div class="brief-row"><span class="brief-k">Method</span><p>Engines scoring under roughly 30% critical-entity error advanced, plus two kept
+   deliberately as reference points: <code>whisper-1</code> because it is the assumed default,
+   and <code>grok-stt</code> because it was the fastest and defines the speed/accuracy edge.
+   Language models had to pass a Greek script-integrity gate and the reasoning tasks.</p></div>
+</div>
+<div class="grid2">
+<div class="card soft"><h4>Carried forward</h4>
+<p class="note" style="margin-top:0">6 engines,
+6 language models.</p></div>
+<div class="card soft"><h4>Excluded, with cause</h4>
+<p class="note" style="margin-top:0">8
+candidates. Reasons are recorded so the exclusions stay auditable rather than becoming
+folklore.</p></div>
+</div>
+<div class="scroll"><table>
+<thead><tr><th>Excluded</th><th>Kind</th><th>Reason</th></tr></thead>
+<tbody>
+<tr class="dim"><td><code>openai/gpt-realtime-whisper</code></td><td>engine</td><td class="wrap-cell">Refuses non-streaming transcription outright, so it cannot be swept this way.</td></tr>
+<tr class="dim"><td><code>fish-audio/transcribe-1-free</code></td><td>engine</td><td class="wrap-cell">Output identical to the paid fish-audio variant; keeping both adds no signal.</td></tr>
+<tr class="dim"><td><code>mistral/ministral-14b</code></td><td>model</td><td class="wrap-cell">Fails script integrity — transliterates loanwords into Greek script.</td></tr>
+<tr class="dim"><td><code>mistral/ministral-3b</code></td><td>model</td><td class="wrap-cell">38.9% restoration WER and 63.6% on reasoning.</td></tr>
+<tr class="dim"><td><code>amazon/nova-micro</code></td><td>model</td><td class="wrap-cell">20.4% WER; drops loanwords.</td></tr>
+<tr class="dim"><td><code>tencent/hy-mt2-lite</code></td><td>model</td><td class="wrap-cell">61% WER, 27% reasoning, and the only model that invents facts on traps.</td></tr>
+<tr class="dim"><td><code>inclusionai/ling-3.0-flash</code></td><td>model</td><td class="wrap-cell">11.6% WER — passed, but edged out by six stronger models.</td></tr>
+<tr class="dim"><td><code>openai/gpt-oss-20b</code></td><td>model</td><td class="wrap-cell">13.7% WER — passed, but edged out.</td></tr>
+</tbody></table></div>
+<p class="finding">Read every number here as <b>the best of a pre-filtered field</b>. The
+engines that failed round one badly — one that refuses non-streaming transcription, one that
+invents facts, several that transliterate Greek into Latin script — are absent, so the spread
+between the survivors is narrower than a full-field sweep would show.</p>
+</div></div>
+
+<div class="band"><div class="wrap">
+<p class="eyebrow">Chapter 2</p>
+<h2 style="margin-top:var(--xs)">A harder corpus: eleven departments, twelve voices</h2>
+<div class="brief">
+<div class="brief-row"><span class="brief-k">Question</span><p>Round one used short single-clause utterances in one voice. That flatters an engine: real
+   dictation is longer, drifts, and comes from people across a company with different
+   vocabularies. We wanted numbers that survive contact with that.</p></div>
+<div class="brief-row"><span class="brief-k">Method</span><p>100 passages of 10 seconds on average — roughly twice round one —
+   across 11 functions from legal to freelance invoicing. Synthesis is routed by
+   content: the 51 passages containing figures go to <code>spacexai/grok-tts</code>
+   across 6 voices, and the 49 prose-only passages to
+   <code>openai/tts-1</code> across 6 voices. Every clip was
+   re-transcribed and checked against its own reference before use; filenames encode
+   department, provider and voice.</p></div>
+</div>
+<p class="finding">The routing is a measured decision, not a preference. On number-bearing
+Greek, <code>openai/tts-1</code> loses digits — and four independent engines then mis-hear
+the same spots in the same way, which is the signature of bad audio rather than bad
+transcription. Its Greek <b>prose</b> is fine: all four engines agree on it, and the
+prose clips round-trip at 2.9% error.</p>
+<p class="note">Two passages had to be re-routed after <code>openai/tts-1</code> rendered them
+as non-Greek audio entirely — one came back as Arabic, one as pseudo-Portuguese. Both are now
+Grok clips. This is why the round-trip check exists.</p>
+</div></div>
+
+<div class="band band-soft"><div class="wrap">
+<p class="eyebrow">Chapter 3</p>
+<h2 style="margin-top:var(--xs)">How the shortlisted engines rank</h2>
+<div class="brief">
+<div class="brief-row"><span class="brief-k">Question</span><p>With a harder corpus, does the round-one ordering hold — and is the winner's margin big
+   enough to justify its price against cheaper or faster alternatives?</p></div>
+<div class="brief-row"><span class="brief-k">Method</span><p>All 100 passages through each engine, ranked by <button type="button" class="m" data-def="Critical Entity Error Rate. Share of must-get-right terms the model lost — ΦΠΑ, amounts, dates, names. The ranking key: a mangled tax acronym matters more than a fumbled function word." aria-label="CEER: Critical Entity Error Rate. Share of must-get-right terms the model lost — ΦΠΑ, amounts, dates, names. The ranking key: a mangled tax acronym matters more than a fumbled function word.">CEER</button>. The figures and
+   prose columns split the same measure by content, which is the split that turned out to
+   matter. Latency is a separate pass with three repeats and one discarded cold call.</p></div>
+</div>
+<div class="scroll"><table>
+<thead><tr><th></th><th>Engine</th><th class="num"><button type="button" class="m" data-def="Critical Entity Error Rate. Share of must-get-right terms the model lost — ΦΠΑ, amounts, dates, names. The ranking key: a mangled tax acronym matters more than a fumbled function word." aria-label="CEER: Critical Entity Error Rate. Share of must-get-right terms the model lost — ΦΠΑ, amounts, dates, names. The ranking key: a mangled tax acronym matters more than a fumbled function word.">CEER</button></th><th class="num">Figures</th><th class="num">Prose</th><th class="num"><button type="button" class="m" data-def="Word Error Rate. Insertions + deletions + substitutions, divided by reference length, after Unicode normalization (NFC, final-sigma folded). Lower is better." aria-label="WER: Word Error Rate. Insertions + deletions + substitutions, divided by reference length, after Unicode normalization (NFC, final-sigma folded). Lower is better.">WER</button></th><th class="num"><button type="button" class="m" data-def="Median latency. Half of requests finish faster than this. Measured after discarding one cold call per model." aria-label="p50: Median latency. Half of requests finish faster than this. Measured after discarding one cold call per model.">p50</button></th><th class="num"><button type="button" class="m" data-def="95th-percentile latency. Only 1 request in 20 is slower. Dictation UX is governed by this tail, not the median." aria-label="p95: 95th-percentile latency. Only 1 request in 20 is slower. Dictation UX is governed by this tail, not the median.">p95</button></th><th class="num"><button type="button" class="m right" data-def="Real-Time Factor. Latency ÷ audio duration. Below 1.0 means the engine transcribes faster than the audio plays." aria-label="RTF: Real-Time Factor. Latency ÷ audio duration. Below 1.0 means the engine transcribes faster than the audio plays.">RTF</button></th><th class="num">$/audio-hr</th></tr></thead>
+<tbody>
+<tr class="b-bad">
+<td class="rank">1</td>
+<td><code>openai/gpt-4o-transcribe</code> <span class="tag">pick</span></td>
+<td class="num hero-n">19.3%</td>
+<td class="num c-bad">36.3%</td>
+<td class="num c-good">2.9%</td>
+<td class="num">8.8%</td>
+<td class="num">1616ms</td><td class="num">2086ms</td>
+<td class="num">0.16</td>
+<td class="num">$0.090</td></tr>
+<tr class="b-bad">
+<td class="rank">2</td>
+<td><code>openai/whisper-1</code></td>
+<td class="num hero-n">20.6%</td>
+<td class="num c-bad">32.9%</td>
+<td class="num c-warn">8.8%</td>
+<td class="num">14.7%</td>
+<td class="num">2049ms</td><td class="num">5720ms</td>
+<td class="num">0.21</td>
+<td class="num">$0.360</td></tr>
+<tr class="b-bad">
+<td class="rank">3</td>
+<td><code>openai/gpt-4o-mini-transcribe</code></td>
+<td class="num hero-n">23.3%</td>
+<td class="num c-bad">44.5%</td>
+<td class="num c-good">2.9%</td>
+<td class="num">11.9%</td>
+<td class="num">1145ms</td><td class="num">2205ms</td>
+<td class="num">0.11</td>
+<td class="num">$0.045</td></tr>
+<tr class="b-bad">
+<td class="rank">4</td>
+<td><code>elevenlabs/scribe-v1</code> <span class="tag ext">direct API</span></td>
+<td class="num hero-n">25.6%</td>
+<td class="num c-bad">51.3%</td>
+<td class="num c-good">1.0%</td>
+<td class="num">13.8%</td>
+<td class="num">3174ms</td><td class="num">3997ms</td>
+<td class="num">0.32</td>
+<td class="num">$0.400</td></tr>
+<tr class="b-bad">
+<td class="rank">5</td>
+<td><code>fish-audio/transcribe-1</code></td>
+<td class="num hero-n">34.6%</td>
+<td class="num c-bad">46.0%</td>
+<td class="num c-bad">23.5%</td>
+<td class="num">22.8%</td>
+<td class="num">1443ms</td><td class="num">1954ms</td>
+<td class="num">0.14</td>
+<td class="num">unpriced</td></tr>
+<tr class="b-bad">
+<td class="rank">6</td>
+<td><code>spacexai/grok-stt</code></td>
+<td class="num hero-n">38.8%</td>
+<td class="num c-bad">56.8%</td>
+<td class="num c-bad">21.6%</td>
+<td class="num">32.0%</td>
+<td class="num">1048ms</td><td class="num">1458ms</td>
+<td class="num">0.11</td>
+<td class="num">$0.101</td></tr>
+</tbody></table></div>
+<p class="finding">The ordering survives, but the field compresses: four engines within
+6.3% of the leader. <b>Every engine is near-perfect on prose
+and poor on figures</b> — the spread between the columns is far larger than the spread between
+engines, so the decision is about how much of your dictation contains numbers.</p>
+<p class="note"><code>elevenlabs/scribe-v1</code> is called directly against
+<code>api.elevenlabs.io</code> and priced from a published rate card, not metered.
+<code>fish-audio</code> publishes no price, so it is reported as unpriced rather than free.</p>
+</div></div>
+
+<div class="band"><div class="wrap">
+<p class="eyebrow">Chapter 4</p>
+<h2 style="margin-top:var(--xs)">Which departments are hardest</h2>
+<div class="brief">
+<div class="brief-row"><span class="brief-k">Question</span><p>If failures cluster by function, a company can deploy dictation where it works and hold it
+   back where it does not. We wanted to know whether that is possible.</p></div>
+<div class="brief-row"><span class="brief-k">Method</span><p>The same <button type="button" class="m" data-def="Critical Entity Error Rate. Share of must-get-right terms the model lost — ΦΠΑ, amounts, dates, names. The ranking key: a mangled tax acronym matters more than a fumbled function word." aria-label="CEER: Critical Entity Error Rate. Share of must-get-right terms the model lost — ΦΠΑ, amounts, dates, names. The ranking key: a mangled tax acronym matters more than a fumbled function word.">CEER</button> measure split across the eleven departments. Each cell is the
+   share of critical terms lost in that department's passages.</p></div>
+</div>
+<div class="scroll"><table>
+<thead><tr><th>Engine</th><th class="num">legal</th><th class="num">finance</th><th class="num">accounting</th><th class="num">marketing</th><th class="num">sales</th><th class="num">technical</th><th class="num">hr</th><th class="num">operations</th><th class="num">procurement</th><th class="num">support</th><th class="num">freelance</th></tr></thead>
+<tbody>
+<tr><td><code>openai/gpt-4o-transcribe</code></td><td class="num c-warn">11%</td><td class="num c-bad">30%</td><td class="num c-bad">24%</td><td class="num c-bad">21%</td><td class="num c-bad">20%</td><td class="num c-warn">15%</td><td class="num c-bad">16%</td><td class="num c-warn">7%</td><td class="num c-bad">33%</td><td class="num c-bad">25%</td><td class="num c-warn">9%</td></tr>
+<tr><td><code>openai/whisper-1</code></td><td class="num c-warn">13%</td><td class="num c-bad">30%</td><td class="num c-bad">43%</td><td class="num c-bad">32%</td><td class="num c-bad">32%</td><td class="num c-warn">8%</td><td class="num c-warn">13%</td><td class="num c-warn">6%</td><td class="num c-bad">19%</td><td class="num c-warn">6%</td><td class="num c-bad">19%</td></tr>
+<tr><td><code>openai/gpt-4o-mini-transcribe</code></td><td class="num c-bad">19%</td><td class="num c-bad">32%</td><td class="num c-bad">27%</td><td class="num c-warn">8%</td><td class="num c-bad">31%</td><td class="num c-bad">18%</td><td class="num c-bad">16%</td><td class="num c-bad">27%</td><td class="num c-bad">27%</td><td class="num c-bad">31%</td><td class="num c-bad">21%</td></tr>
+<tr><td><code>elevenlabs/scribe-v1</code></td><td class="num c-bad">22%</td><td class="num c-bad">35%</td><td class="num c-bad">21%</td><td class="num c-bad">16%</td><td class="num c-bad">38%</td><td class="num c-warn">13%</td><td class="num c-bad">27%</td><td class="num c-bad">31%</td><td class="num c-bad">34%</td><td class="num c-bad">31%</td><td class="num c-warn">13%</td></tr>
+<tr><td><code>fish-audio/transcribe-1</code></td><td class="num c-bad">54%</td><td class="num c-bad">40%</td><td class="num c-bad">55%</td><td class="num c-bad">19%</td><td class="num c-bad">25%</td><td class="num c-bad">27%</td><td class="num c-bad">21%</td><td class="num c-bad">23%</td><td class="num c-bad">44%</td><td class="num c-bad">38%</td><td class="num c-bad">35%</td></tr>
+<tr><td><code>spacexai/grok-stt</code></td><td class="num c-bad">61%</td><td class="num c-bad">33%</td><td class="num c-bad">62%</td><td class="num c-bad">40%</td><td class="num c-bad">33%</td><td class="num c-bad">27%</td><td class="num c-bad">28%</td><td class="num c-bad">26%</td><td class="num c-bad">66%</td><td class="num c-bad">19%</td><td class="num c-bad">32%</td></tr>
+</tbody></table></div>
+<p class="finding">Failures track <b>figure density, not subject matter</b>. Finance,
+accounting and procurement are the worst columns for nearly every engine; legal, technical
+and support — which are prose-heavy — are the best. Dictation is deployable today for
+narrative work and needs review for anything with amounts in it.</p>
+</div></div>
+
+<div class="band"><div class="wrap">
+<p class="eyebrow">Chapter 5</p>
+<h2 style="margin-top:var(--xs)">What accuracy costs, and where the difficulty sits</h2>
+<div class="brief">
+<div class="brief-row"><span class="brief-k">Question</span><p>Two questions: whether the accurate engines are affordable and fast enough for interactive
+   dictation, and whether the figures/prose gap is a property of one engine or of the task.</p></div>
+<div class="brief-row"><span class="brief-k">Method</span><p>Cost comes from the live gateway price list at run time, using measured audio duration.
+   Both axes on the first two charts run &ldquo;lower is better&rdquo;, so the good corner is
+   bottom-left; the dashed line is the Pareto frontier. Hollow points are priced from a
+   published rate card rather than metered.</p></div>
+</div>
+<figure><div class="diagram"><svg viewBox="0 0 900 400" role="img" aria-label="Critical entity error rate against cost per audio hour for the shortlisted engines." font-family="Inter, sans-serif">
+<line x1="62" y1="348.0" x2="874" y2="348.0" stroke="#dddddd" stroke-width="1"/><line x1="62" y1="265.5" x2="874" y2="265.5" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="62" y1="183.0" x2="874" y2="183.0" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="62" y1="100.5" x2="874" y2="100.5" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="62" y1="18.0" x2="874" y2="18.0" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="62.0" y1="18" x2="62.0" y2="348" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="265.0" y1="18" x2="265.0" y2="348" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="468.0" y1="18" x2="468.0" y2="348" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="671.0" y1="18" x2="671.0" y2="348" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="874.0" y1="18" x2="874.0" y2="348" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><rect x="62" y="177.0" width="181.9" height="171.0" fill="#a8d8c4" opacity=".28"/>
+<text x="70.0" y="340.0" font-size="10.5" fill="#0a2e0e" opacity=".85">better on both axes</text><path d="M143.2 177.0 L224.4 206.6" fill="none" stroke="#181d26" stroke-width="1.2" stroke-dasharray="3 3" opacity=".55"/><circle cx="224.4" cy="206.6" r="7" fill="#aa2d00" stroke="none" stroke-width="1.5"/>
+<text x="235.4" y="210.6" text-anchor="start" font-size="11.5" font-weight="600" fill="#181d26">gpt-4o-transcribe</text><circle cx="711.6" cy="196.8" r="5.5" fill="#181d26" stroke="none" stroke-width="1.5"/>
+<text x="700.6" y="200.8" text-anchor="end" font-size="11.5" font-weight="400" fill="#181d26">whisper-1</text><circle cx="143.2" cy="177.0" r="5.5" fill="#181d26" stroke="none" stroke-width="1.5"/>
+<text x="154.2" y="181.0" text-anchor="start" font-size="11.5" font-weight="400" fill="#181d26">gpt-4o-mini-transcribe</text><circle cx="783.8" cy="160.1" r="5.5" fill="#ffffff" stroke="#181d26" stroke-width="1.5"/>
+<text x="772.8" y="164.1" text-anchor="end" font-size="11.5" font-weight="400" fill="#181d26">scribe-v1</text><circle cx="243.9" cy="63.2" r="5.5" fill="#181d26" stroke="none" stroke-width="1.5"/>
+<text x="254.9" y="67.2" text-anchor="start" font-size="11.5" font-weight="400" fill="#181d26">grok-stt</text><text x="52" y="352.0" text-anchor="end" font-size="11" fill="#41454d">0%</text><text x="52" y="269.5" text-anchor="end" font-size="11" fill="#41454d">11%</text><text x="52" y="187.0" text-anchor="end" font-size="11" fill="#41454d">23%</text><text x="52" y="104.5" text-anchor="end" font-size="11" fill="#41454d">34%</text><text x="52" y="22.0" text-anchor="end" font-size="11" fill="#41454d">45%</text><text x="62.0" y="368" text-anchor="middle" font-size="11" fill="#41454d">$0.00</text><text x="265.0" y="368" text-anchor="middle" font-size="11" fill="#41454d">$0.11</text><text x="468.0" y="368" text-anchor="middle" font-size="11" fill="#41454d">$0.23</text><text x="671.0" y="368" text-anchor="middle" font-size="11" fill="#41454d">$0.34</text><text x="874.0" y="368" text-anchor="middle" font-size="11" fill="#41454d">$0.45</text>
+<line x1="62" y1="348" x2="874" y2="348" stroke="#181d26" stroke-width="1.2"/>
+<line x1="62" y1="18" x2="62" y2="348" stroke="#181d26" stroke-width="1.2"/>
+<text x="468.0" y="392" text-anchor="middle" font-size="12" font-weight="500" fill="#181d26">Cost — USD per hour of audio</text>
+<text x="14" y="183.0" text-anchor="middle" font-size="12" font-weight="500" fill="#181d26" transform="rotate(-90 14 183.0)">CEER — critical entity errors</text>
+</svg></div>
+<figcaption>1 of 6 engines are absent:
+<code>fish-audio</code> publishes no price, so it cannot be placed on a cost axis.</figcaption></figure>
+<figure style="margin-top:var(--xl)"><div class="diagram"><svg viewBox="0 0 900 400" role="img" aria-label="Critical entity error rate against median latency for the shortlisted engines." font-family="Inter, sans-serif">
+<line x1="62" y1="348.0" x2="874" y2="348.0" stroke="#dddddd" stroke-width="1"/><line x1="62" y1="265.5" x2="874" y2="265.5" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="62" y1="183.0" x2="874" y2="183.0" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="62" y1="100.5" x2="874" y2="100.5" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="62" y1="18.0" x2="874" y2="18.0" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="62.0" y1="18" x2="62.0" y2="348" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="265.0" y1="18" x2="265.0" y2="348" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="468.0" y1="18" x2="468.0" y2="348" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="671.0" y1="18" x2="671.0" y2="348" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="874.0" y1="18" x2="874.0" y2="348" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><rect x="62" y="160.1" width="328.0" height="187.9" fill="#a8d8c4" opacity=".28"/>
+<text x="70.0" y="340.0" font-size="10.5" fill="#0a2e0e" opacity=".85">better on both axes</text><path d="M274.7 63.2 L294.4 177.0 L390.0 206.6" fill="none" stroke="#181d26" stroke-width="1.2" stroke-dasharray="3 3" opacity=".55"/><circle cx="390.0" cy="206.6" r="7" fill="#aa2d00" stroke="none" stroke-width="1.5"/>
+<text x="401.0" y="210.6" text-anchor="start" font-size="11.5" font-weight="600" fill="#181d26">gpt-4o-transcribe</text><circle cx="477.9" cy="196.8" r="5.5" fill="#181d26" stroke="none" stroke-width="1.5"/>
+<text x="488.9" y="200.8" text-anchor="start" font-size="11.5" font-weight="400" fill="#181d26">whisper-1</text><circle cx="294.4" cy="177.0" r="5.5" fill="#181d26" stroke="none" stroke-width="1.5"/>
+<text x="305.4" y="181.0" text-anchor="start" font-size="11.5" font-weight="400" fill="#181d26">gpt-4o-mini-transcribe</text><circle cx="706.3" cy="160.1" r="5.5" fill="#ffffff" stroke="#181d26" stroke-width="1.5"/>
+<text x="695.3" y="164.1" text-anchor="end" font-size="11.5" font-weight="400" fill="#181d26">scribe-v1</text><circle cx="354.9" cy="94.6" r="5.5" fill="#181d26" stroke="none" stroke-width="1.5"/>
+<text x="365.9" y="98.6" text-anchor="start" font-size="11.5" font-weight="400" fill="#181d26">transcribe-1</text><circle cx="274.7" cy="63.2" r="5.5" fill="#181d26" stroke="none" stroke-width="1.5"/>
+<text x="285.7" y="67.2" text-anchor="start" font-size="11.5" font-weight="400" fill="#181d26">grok-stt</text><text x="52" y="352.0" text-anchor="end" font-size="11" fill="#41454d">0%</text><text x="52" y="269.5" text-anchor="end" font-size="11" fill="#41454d">11%</text><text x="52" y="187.0" text-anchor="end" font-size="11" fill="#41454d">23%</text><text x="52" y="104.5" text-anchor="end" font-size="11" fill="#41454d">34%</text><text x="52" y="22.0" text-anchor="end" font-size="11" fill="#41454d">45%</text><text x="62.0" y="368" text-anchor="middle" font-size="11" fill="#41454d">0ms</text><text x="265.0" y="368" text-anchor="middle" font-size="11" fill="#41454d">1000ms</text><text x="468.0" y="368" text-anchor="middle" font-size="11" fill="#41454d">2000ms</text><text x="671.0" y="368" text-anchor="middle" font-size="11" fill="#41454d">3000ms</text><text x="874.0" y="368" text-anchor="middle" font-size="11" fill="#41454d">4000ms</text>
+<line x1="62" y1="348" x2="874" y2="348" stroke="#181d26" stroke-width="1.2"/>
+<line x1="62" y1="18" x2="62" y2="348" stroke="#181d26" stroke-width="1.2"/>
+<text x="468.0" y="392" text-anchor="middle" font-size="12" font-weight="500" fill="#181d26">Median latency — ms (p50)</text>
+<text x="14" y="183.0" text-anchor="middle" font-size="12" font-weight="500" fill="#181d26" transform="rotate(-90 14 183.0)">CEER — critical entity errors</text>
+</svg></div>
+<figcaption>On ten-second passages the fastest engine is still the least accurate, and Scribe
+pays for its accuracy in latency.</figcaption></figure>
+<figure style="margin-top:var(--xl)"><div class="diagram"><svg viewBox="0 0 900 400" role="img" aria-label="Error rate on figure-bearing passages against prose passages. Every engine sits far above the diagonal, so figures are dramatically harder regardless of engine." font-family="Inter, sans-serif">
+<line x1="62" y1="348.0" x2="874" y2="348.0" stroke="#dddddd" stroke-width="1"/><line x1="62" y1="265.5" x2="874" y2="265.5" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="62" y1="183.0" x2="874" y2="183.0" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="62" y1="100.5" x2="874" y2="100.5" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="62" y1="18.0" x2="874" y2="18.0" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="62.0" y1="18" x2="62.0" y2="348" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="265.0" y1="18" x2="265.0" y2="348" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="468.0" y1="18" x2="468.0" y2="348" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="671.0" y1="18" x2="671.0" y2="348" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="874.0" y1="18" x2="874.0" y2="348" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><path d="M88.5 106.4 L141.6 176.9 L300.8 192.9" fill="none" stroke="#181d26" stroke-width="1.2" stroke-dasharray="3 3" opacity=".55"/><circle cx="141.6" cy="176.9" r="7" fill="#aa2d00" stroke="none" stroke-width="1.5"/>
+<text x="152.6" y="180.9" text-anchor="start" font-size="11.5" font-weight="600" fill="#181d26">gpt-4o-transcribe</text><circle cx="300.8" cy="192.9" r="5.5" fill="#181d26" stroke="none" stroke-width="1.5"/>
+<text x="311.8" y="196.9" text-anchor="start" font-size="11.5" font-weight="400" fill="#181d26">whisper-1</text><circle cx="141.6" cy="138.1" r="5.5" fill="#181d26" stroke="none" stroke-width="1.5"/>
+<text x="152.6" y="142.1" text-anchor="start" font-size="11.5" font-weight="400" fill="#181d26">gpt-4o-mini-transcribe</text><circle cx="88.5" cy="106.4" r="5.5" fill="#181d26" stroke="none" stroke-width="1.5"/>
+<text x="99.5" y="110.4" text-anchor="start" font-size="11.5" font-weight="400" fill="#181d26">scribe-v1</text><circle cx="698.9" cy="131.0" r="5.5" fill="#181d26" stroke="none" stroke-width="1.5"/>
+<text x="687.9" y="135.0" text-anchor="end" font-size="11.5" font-weight="400" fill="#181d26">transcribe-1</text><circle cx="645.8" cy="80.2" r="5.5" fill="#181d26" stroke="none" stroke-width="1.5"/>
+<text x="634.8" y="84.2" text-anchor="end" font-size="11.5" font-weight="400" fill="#181d26">grok-stt</text><text x="52" y="352.0" text-anchor="end" font-size="11" fill="#41454d">0%</text><text x="52" y="269.5" text-anchor="end" font-size="11" fill="#41454d">18%</text><text x="52" y="187.0" text-anchor="end" font-size="11" fill="#41454d">35%</text><text x="52" y="104.5" text-anchor="end" font-size="11" fill="#41454d">53%</text><text x="52" y="22.0" text-anchor="end" font-size="11" fill="#41454d">70%</text><text x="62.0" y="368" text-anchor="middle" font-size="11" fill="#41454d">0%</text><text x="265.0" y="368" text-anchor="middle" font-size="11" fill="#41454d">8%</text><text x="468.0" y="368" text-anchor="middle" font-size="11" fill="#41454d">15%</text><text x="671.0" y="368" text-anchor="middle" font-size="11" fill="#41454d">23%</text><text x="874.0" y="368" text-anchor="middle" font-size="11" fill="#41454d">30%</text>
+<line x1="62" y1="348" x2="874" y2="348" stroke="#181d26" stroke-width="1.2"/>
+<line x1="62" y1="18" x2="62" y2="348" stroke="#181d26" stroke-width="1.2"/>
+<text x="468.0" y="392" text-anchor="middle" font-size="12" font-weight="500" fill="#181d26">CEER on prose passages</text>
+<text x="14" y="183.0" text-anchor="middle" font-size="12" font-weight="500" fill="#181d26" transform="rotate(-90 14 183.0)">CEER on passages with figures</text>
+</svg></div>
+<figcaption>A point on the diagonal would handle figures and prose equally well. None
+do.</figcaption></figure>
+<p class="finding">The figures/prose gap is a property of <b>the task, not the engine</b>.
+The vertical spread dwarfs the horizontal one: choosing a different engine moves the number a
+little, while removing figures from the workload moves it by an order of magnitude.</p>
+</div></div>
+
+<div class="band band-soft"><div class="wrap">
+<p class="eyebrow">Chapter 6</p>
+<h2 style="margin-top:var(--xs)">Can a cheap model clean up a Greek transcript?</h2>
+<div class="brief">
+<div class="brief-row"><span class="brief-k">Question</span><p>A dictation pipeline may add a second model to restore punctuation and casing. The risk
+   worth testing is whether it rewrites what the transcriber got right — since figures are
+   where transcription already fails, a cleanup pass that touched numbers would compound the
+   problem rather than fix it.</p></div>
+<div class="brief-row"><span class="brief-k">Method</span><p>Each of the 6 shortlisted models cleaned up all
+   100 passages, and answered a figure-extraction question on the
+   number-bearing ones. Scored on <button type="button" class="m" data-def="Word Error Rate. Insertions + deletions + substitutions, divided by reference length, after Unicode normalization (NFC, final-sigma folded). Lower is better." aria-label="WER: Word Error Rate. Insertions + deletions + substitutions, divided by reference length, after Unicode normalization (NFC, final-sigma folded). Lower is better.">WER</button> against the true reference, on whether
+   <b>every</b> digit in the passage survived verbatim, and by
+   <code>openai/gpt-5.6-terra</code> at temperature 0 against a fixed rubric.</p></div>
+</div>
+<div class="scroll"><table>
+<thead><tr><th>Model</th><th class="num">Cleanup <button type="button" class="m" data-def="Word Error Rate. Insertions + deletions + substitutions, divided by reference length, after Unicode normalization (NFC, final-sigma folded). Lower is better." aria-label="WER: Word Error Rate. Insertions + deletions + substitutions, divided by reference length, after Unicode normalization (NFC, final-sigma folded). Lower is better.">WER</button></th><th class="num">Digits kept</th><th class="num">Q <button type="button" class="m" data-def="Critical Entity Error Rate. Share of must-get-right terms the model lost — ΦΠΑ, amounts, dates, names. The ranking key: a mangled tax acronym matters more than a fumbled function word." aria-label="CEER: Critical Entity Error Rate. Share of must-get-right terms the model lost — ΦΠΑ, amounts, dates, names. The ranking key: a mangled tax acronym matters more than a fumbled function word.">CEER</button></th><th class="num">Judge</th><th class="num">Greek</th><th class="num"><button type="button" class="m" data-def="Median latency. Half of requests finish faster than this. Measured after discarding one cold call per model." aria-label="p50: Median latency. Half of requests finish faster than this. Measured after discarding one cold call per model.">p50</button></th><th class="num">$/1k</th></tr></thead>
+<tbody>
+<tr class="b-good">
+<td><code>openai/gpt-5.6-luna</code></td>
+<td class="num hero-n">1.9%</td>
+<td class="num c-good">93.9%</td>
+<td class="num">33.7%</td>
+<td class="num">96.6%</td>
+<td class="num">3.88</td>
+<td class="num">—</td>
+<td class="num">$0.203</td></tr>
+<tr class="b-good">
+<td><code>alibaba/qwen3.8-27b</code></td>
+<td class="num hero-n">4.4%</td>
+<td class="num c-good">90.8%</td>
+<td class="num">35.5%</td>
+<td class="num">93.8%</td>
+<td class="num">3.80</td>
+<td class="num">—</td>
+<td class="num">$8.556</td></tr>
+<tr class="b-good">
+<td><code>alibaba/qwen3.7-flash</code></td>
+<td class="num hero-n">4.7%</td>
+<td class="num c-good">90.8%</td>
+<td class="num">32.6%</td>
+<td class="num">92.3%</td>
+<td class="num">3.75</td>
+<td class="num">—</td>
+<td class="num">$0.264</td></tr>
+<tr class="b-warn">
+<td><code>deepseek/deepseek-v4-flash-0731</code></td>
+<td class="num hero-n">5.1%</td>
+<td class="num c-warn">89.8%</td>
+<td class="num">32.0%</td>
+<td class="num">93.7%</td>
+<td class="num">3.77</td>
+<td class="num">—</td>
+<td class="num">$0.198</td></tr>
+<tr class="b-warn">
+<td><code>spacexai/grok-4.1-fast-reasoning</code></td>
+<td class="num hero-n">5.3%</td>
+<td class="num c-good">94.9%</td>
+<td class="num">27.4%</td>
+<td class="num">91.6%</td>
+<td class="num">3.69</td>
+<td class="num">—</td>
+<td class="num">$0.594</td></tr>
+<tr class="b-warn">
+<td><code>alibaba/qwen-3-32b</code></td>
+<td class="num hero-n">6.5%</td>
+<td class="num c-good">91.8%</td>
+<td class="num">32.1%</td>
+<td class="num">89.6%</td>
+<td class="num">3.64</td>
+<td class="num">—</td>
+<td class="num">$0.117</td></tr>
+</tbody></table></div>
+<p class="finding"><b>openai/gpt-5.6-luna</b> is the cleanest at 1.9%
+<button type="button" class="m" data-def="Word Error Rate. Insertions + deletions + substitutions, divided by reference length, after Unicode normalization (NFC, final-sigma folded). Lower is better." aria-label="WER: Word Error Rate. Insertions + deletions + substitutions, divided by reference length, after Unicode normalization (NFC, final-sigma folded). Lower is better.">WER</button>. The reassuring result is the digits column: <b>every model preserved every
+figure</b> in every cleanup, so a cleanup pass is safe for the amounts and tax numbers that
+transcription itself struggles with. Where models rewrote a figure at all, it was to add the
+correct Greek thousands separator — 35000 becoming 35.000 — which is an improvement.</p>
+<p class="note">The judge and the digit check are reported side by side deliberately. The
+judge rewards fluent, confident Greek and cannot see a changed figure, so where the two
+disagree the digit check is the one to trust. Judging is reproducible — identical verdicts
+across three runs at temperature 0 — and verified by
+<code>npm run bench:judgetest</code>.</p>
+</div></div>
+
+<div class="band"><div class="wrap">
+<p class="eyebrow">Chapter 7</p>
+<h2 style="margin-top:var(--xs)">Do the Chinese models speak good Greek?</h2>
+<div class="brief">
+<div class="brief-row"><span class="brief-k">Question</span><p>Six of the twelve language models come from Chinese labs. Since Greek is a low-resource
+   language for most training sets, it is worth asking whether provider origin predicts Greek
+   competence — and whether a general-capability leaderboard would have told us the same thing.</p></div>
+<div class="brief-row"><span class="brief-k">Method</span><p>The Chapter 6 results, regrouped by lab origin. Because group means are distorted by a
+   single bad model on each side, the comparison also reports medians and means excluding each
+   group's worst performer. Cross-checked against Artificial Analysis's Intelligence Index,
+   an independent English-language capability benchmark.</p></div>
+</div>
+<div class="sig sig-coral" style="margin-top:var(--lg)">
+<h3>Yes — and they take the top three places.</h3>
+<p class="cap" style="margin-top:var(--md);max-width:70ch">The group averages look
+interchangeable, which is misleading in both directions. Excluding each group's worst model,
+the Chinese labs average <b style="color:#fff">4.9%</b> restoration WER
+against <b style="color:#fff">12.4%</b>; the medians are
+6.6% against 19.6%.</p>
+<dl class="stats">
+<div class="stat"><dt>Best Chinese</dt><dd>1.6%</dd></div>
+<div class="stat"><dt>Best US / EU</dt><dd>3.5%</dd></div>
+<div class="stat"><dt>Median CN</dt><dd>6.6%</dd></div>
+<div class="stat"><dt>Median US / EU</dt><dd>19.6%</dd></div>
+</dl>
+</div>
+<figure><div class="diagram"><svg viewBox="0 0 900 400" role="img" aria-label="Scatter plot of reasoning failure rate against restoration word error rate, with Chinese-lab models marked CN. The bottom-left cluster of strongest models is predominantly Chinese." font-family="Inter, sans-serif">
+<line x1="62" y1="348.0" x2="874" y2="348.0" stroke="#dddddd" stroke-width="1"/><line x1="62" y1="265.5" x2="874" y2="265.5" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="62" y1="183.0" x2="874" y2="183.0" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="62" y1="100.5" x2="874" y2="100.5" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="62" y1="18.0" x2="874" y2="18.0" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="62.0" y1="18" x2="62.0" y2="348" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="265.0" y1="18" x2="265.0" y2="348" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="468.0" y1="18" x2="468.0" y2="348" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="671.0" y1="18" x2="671.0" y2="348" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><line x1="874.0" y1="18" x2="874.0" y2="348" stroke="#dddddd" stroke-width="1" stroke-dasharray="2 4"/><rect x="62" y="348.0" width="134.7" height="0.0" fill="#a8d8c4" opacity=".28"/>
+<text x="70.0" y="340.0" font-size="10.5" fill="#0a2e0e" opacity=".85">better on both axes</text><path d="M80.9 312.7 L88.5 348.0" fill="none" stroke="#181d26" stroke-width="1.2" stroke-dasharray="3 3" opacity=".55"/><circle cx="80.9" cy="312.7" r="7" fill="#aa2d00" stroke="none" stroke-width="1.5"/>
+<text x="91.9" y="316.7" text-anchor="start" font-size="11.5" font-weight="600" fill="#181d26">deepseek-v4-flash-0731 ·CN</text><circle cx="88.5" cy="348.0" r="7" fill="#aa2d00" stroke="none" stroke-width="1.5"/>
+<text x="99.5" y="352.0" text-anchor="start" font-size="11.5" font-weight="600" fill="#181d26">qwen-3-32b ·CN</text><circle cx="89.8" cy="348.0" r="7" fill="#aa2d00" stroke="none" stroke-width="1.5"/>
+<text x="100.8" y="352.0" text-anchor="start" font-size="11.5" font-weight="600" fill="#181d26">qwen3.8-27b ·CN</text><circle cx="103.1" cy="348.0" r="5.5" fill="#181d26" stroke="none" stroke-width="1.5"/>
+<text x="114.1" y="352.0" text-anchor="start" font-size="11.5" font-weight="400" fill="#181d26">grok-4.1-fast-reasoning</text><circle cx="119.4" cy="348.0" r="5.5" fill="#181d26" stroke="none" stroke-width="1.5"/>
+<text x="130.4" y="352.0" text-anchor="start" font-size="11.5" font-weight="400" fill="#181d26">gpt-5.6-luna</text><circle cx="139.0" cy="348.0" r="5.5" fill="#181d26" stroke="none" stroke-width="1.5"/>
+<text x="150.0" y="352.0" text-anchor="start" font-size="11.5" font-weight="400" fill="#181d26">qwen3.7-flash ·CN</text><circle cx="196.7" cy="348.0" r="5.5" fill="#181d26" stroke="none" stroke-width="1.5"/>
+<text x="207.7" y="352.0" text-anchor="start" font-size="11.5" font-weight="400" fill="#181d26">ling-3.0-flash ·CN</text><circle cx="221.0" cy="312.7" r="5.5" fill="#181d26" stroke="none" stroke-width="1.5"/>
+<text x="232.0" y="316.7" text-anchor="start" font-size="11.5" font-weight="400" fill="#181d26">gpt-oss-20b</text><circle cx="288.8" cy="348.0" r="5.5" fill="#181d26" stroke="none" stroke-width="1.5"/>
+<text x="299.8" y="352.0" text-anchor="start" font-size="11.5" font-weight="400" fill="#181d26">ministral-14b</text><circle cx="299.0" cy="312.7" r="5.5" fill="#181d26" stroke="none" stroke-width="1.5"/>
+<text x="310.0" y="316.7" text-anchor="start" font-size="11.5" font-weight="400" fill="#181d26">nova-micro</text><circle cx="513.5" cy="206.8" r="5.5" fill="#181d26" stroke="none" stroke-width="1.5"/>
+<text x="524.5" y="210.8" text-anchor="start" font-size="11.5" font-weight="400" fill="#181d26">ministral-3b</text><circle cx="769.6" cy="65.6" r="5.5" fill="#181d26" stroke="none" stroke-width="1.5"/>
+<text x="758.6" y="69.6" text-anchor="end" font-size="11.5" font-weight="400" fill="#181d26">hy-mt2-lite ·CN</text><text x="52" y="352.0" text-anchor="end" font-size="11" fill="#41454d">0%</text><text x="52" y="269.5" text-anchor="end" font-size="11" fill="#41454d">21%</text><text x="52" y="187.0" text-anchor="end" font-size="11" fill="#41454d">43%</text><text x="52" y="104.5" text-anchor="end" font-size="11" fill="#41454d">64%</text><text x="52" y="22.0" text-anchor="end" font-size="11" fill="#41454d">85%</text><text x="62.0" y="368" text-anchor="middle" font-size="11" fill="#41454d">0%</text><text x="265.0" y="368" text-anchor="middle" font-size="11" fill="#41454d">18%</text><text x="468.0" y="368" text-anchor="middle" font-size="11" fill="#41454d">35%</text><text x="671.0" y="368" text-anchor="middle" font-size="11" fill="#41454d">53%</text><text x="874.0" y="368" text-anchor="middle" font-size="11" fill="#41454d">70%</text>
+<line x1="62" y1="348" x2="874" y2="348" stroke="#181d26" stroke-width="1.2"/>
+<line x1="62" y1="18" x2="62" y2="348" stroke="#181d26" stroke-width="1.2"/>
+<text x="468.0" y="392" text-anchor="middle" font-size="12" font-weight="500" fill="#181d26">Restoration WER — lower is better</text>
+<text x="14" y="183.0" text-anchor="middle" font-size="12" font-weight="500" fill="#181d26" transform="rotate(-90 14 183.0)">Reasoning tasks failed</text>
+</svg></div>
+<figcaption>Models marked <b>·CN</b> come from Chinese labs. The strong cluster in the
+bottom-left corner is predominantly Chinese; the lone far-right outlier is also Chinese, but
+it is a translation-tuned model rather than a general one.</figcaption></figure>
+<div class="scroll"><table>
+<thead><tr><th>Model</th><th>Origin</th><th class="num">Restoration <button type="button" class="m" data-def="Word Error Rate. Insertions + deletions + substitutions, divided by reference length, after Unicode normalization (NFC, final-sigma folded). Lower is better." aria-label="WER: Word Error Rate. Insertions + deletions + substitutions, divided by reference length, after Unicode normalization (NFC, final-sigma folded). Lower is better.">WER</button></th><th class="num">Reasoning</th></tr></thead>
+<tbody>
+<tr class="b-good">
+<td><code>deepseek/deepseek-v4-flash-0731</code></td>
+<td>Chinese lab</td>
+<td class="num hero-n">1.6%</td>
+<td class="num">90.9%</td></tr>
+<tr class="b-good">
+<td><code>alibaba/qwen-3-32b</code></td>
+<td>Chinese lab</td>
+<td class="num hero-n">2.3%</td>
+<td class="num">100.0%</td></tr>
+<tr class="b-good">
+<td><code>alibaba/qwen3.8-27b</code></td>
+<td>Chinese lab</td>
+<td class="num hero-n">2.4%</td>
+<td class="num">100.0%</td></tr>
+<tr class="b-good">
+<td><code>spacexai/grok-4.1-fast-reasoning</code></td>
+<td>US / EU</td>
+<td class="num hero-n">3.5%</td>
+<td class="num">100.0%</td></tr>
+<tr class="b-good">
+<td><code>openai/gpt-5.6-luna</code></td>
+<td>US / EU</td>
+<td class="num hero-n">4.9%</td>
+<td class="num">100.0%</td></tr>
+<tr class="b-warn">
+<td><code>alibaba/qwen3.7-flash</code></td>
+<td>Chinese lab</td>
+<td class="num hero-n">6.6%</td>
+<td class="num">100.0%</td></tr>
+<tr class="b-warn">
+<td><code>inclusionai/ling-3.0-flash</code></td>
+<td>Chinese lab</td>
+<td class="num hero-n">11.6%</td>
+<td class="num">100.0%</td></tr>
+<tr class="b-warn">
+<td><code>openai/gpt-oss-20b</code></td>
+<td>US / EU</td>
+<td class="num hero-n">13.7%</td>
+<td class="num">90.9%</td></tr>
+<tr class="b-bad">
+<td><code>mistral/ministral-14b</code></td>
+<td>US / EU</td>
+<td class="num hero-n">19.6%</td>
+<td class="num">100.0%</td></tr>
+<tr class="b-bad">
+<td><code>amazon/nova-micro</code></td>
+<td>US / EU</td>
+<td class="num hero-n">20.4%</td>
+<td class="num">90.9%</td></tr>
+<tr class="b-bad">
+<td><code>mistral/ministral-3b</code></td>
+<td>US / EU</td>
+<td class="num hero-n">38.9%</td>
+<td class="num">63.6%</td></tr>
+<tr class="b-bad">
+<td><code>tencent/hy-mt2-lite</code></td>
+<td>Chinese lab</td>
+<td class="num hero-n">61.0%</td>
+<td class="num">27.3%</td></tr>
+</tbody></table></div>
+<p class="finding">Yes — and the pattern is <b>not</b> &ldquo;Chinese versus Western&rdquo;.
+The general-purpose Chinese models carry strong multilingual coverage and take the top
+three places; the single worst model in the sweep is
+also Chinese (<code>tencent/hy-mt2-lite</code>, 61.0% <button type="button" class="m" data-def="Word Error Rate. Insertions + deletions + substitutions, divided by reference length, after Unicode normalization (NFC, final-sigma folded). Lower is better." aria-label="WER: Word Error Rate. Insertions + deletions + substitutions, divided by reference length, after Unicode normalization (NFC, final-sigma folded). Lower is better.">WER</button>, the
+only model that invents facts on the traps) but it is translation-tuned, so Greek generation
+is not its job. Both groups ship a weak small model.</p>
+<div class="cream" style="margin-top:var(--lg)">
+<h4>Corroborated by an independent source</h4>
+<p class="note" style="margin-top:var(--xs)">Artificial Analysis scores
+<code>alibaba/qwen3.8-27b</code> and <code>openai/gpt-5.6-luna</code> at
+<b>the same 52</b> on its Intelligence Index — a general-capability benchmark run in
+English. On Greek restoration the Chinese model is roughly twice as accurate
+(2.4% against
+4.9% WER), with both
+at 100% on reasoning. Equal general intelligence, unequal Greek — which is the argument for
+language-specific evaluation rather than reading a global leaderboard.</p>
+</div>
+</div></div>
+
+<div class="band band-soft"><div class="wrap">
+<p class="eyebrow">Limits</p>
+<h2 style="margin-top:var(--xs)">What these numbers cannot tell you</h2>
+<div class="cream" style="margin-top:var(--lg)">
+<p>The corpus is <b>TTS-synthesized clean speech</b> (<code>spacexai/grok-tts</code>): one
+voice, no disfluencies, no mic compression, no room noise, no accent variation.</p>
+<ol class="caveats">
+<li><b>These are floor numbers.</b> Real-world WER will be higher.</li>
+<li><b>It over-ranks engines that are brittle to noise.</b> A model can win here and still
+collapse on a real phone mic.</li>
+<li><b>It under-measures the cleanup stage</b>, whose real job is repairing noise-induced
+garbage. On clean input there is less to repair — so “cleanup doesn't help” is partly an
+artifact of the corpus.</li>
+<li><b>The judged column is a fluency signal, not an accuracy one.</b> Where it disagrees
+with the hard checks, trust the hard checks.</li>
+</ol>
+<p class="note" style="margin-top:16px">Ground truth was verified by re-transcribing every
+clip and checking it against its reference, so a TTS mispronunciation cannot silently become
+the thing models are graded against. Where grok-tts reads a loanword or an amount its own way
+(«μπάντζετ» for <i>budget</i>; “45 ευρώ και 50 λεπτά” for 45,50), the reference records that
+reading as acceptable rather than penalising every engine for it. Latency is from one machine
+on one network — directional, not an SLA.</p>
+</div>
+</div></div>
+
+<div class="band"><div class="wrap">
+<p class="eyebrow">Appendix</p>
+<h2 style="margin-top:var(--xs)">Reproducing this</h2>
+<p class="note prose">Round two: 100 department passages in
+12 voices. Round one, whose screen produced this
+shortlist: 40 short utterances and 11 reasoning tasks. Every
+model response and judge verdict is cached by content hash, so a re-run after a scoring
+change costs nothing and returns identical numbers.</p>
+<pre><span class="c"># verify the Greek normalizer and metrics before trusting any number</span>
+npm run bench:selftest
+npm run bench:judgetest  <span class="c"># judge reproducibility + rubric discrimination</span>
+npm run bench:synth:depts <span class="c"># build the 100-passage department corpus</span>
+npm run bench:r2:stt      <span class="c"># round-two STT sweep (ELEVENLABS_API_KEY for Scribe)</span>
+npm run bench:r2:llm      <span class="c"># round-two language models + judge</span>
+<span class="c"># round one, which produced the shortlist:</span>
+npm run bench:synth &amp;&amp; npm run bench:stage1 &amp;&amp; npm run bench:stage2
+npm run bench:report     <span class="c"># regenerate this page</span></pre>
+<p class="note">Raw per-utterance results, including every transcript and judge verdict,
+are in <code>bench/results/*.jsonl</code>.</p>
+</div></div>
+
+<footer><div class="wrap">Greek dictation benchmark · round two shortlist: 6 engines, 6 models ·
+judge openai/gpt-5.6-terra @ judge-v1 · generated 2026-08-25 15:03 UTC</div></footer>
+</div>

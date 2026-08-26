@@ -1,0 +1,17 @@
+node_modules
+
+# Secrets. .env.example documents the shape without carrying values.
+.env
+.env.local
+!.env.example
+
+# Generated benchmark artifacts.
+# Audio, cached model responses and raw results are all regenerable, and together they run to
+# tens of megabytes. The manifests are kept: they record which audio produced which results,
+# which is what makes two runs provably comparable.
+/bench/*
+!/bench/manifest.json
+!/bench/manifest-depts.json
+
+.DS_Store
+*.tsbuildinfo

@@ -1,0 +1,32 @@
+{
+  "name": "greek-dictation-benchmark",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Benchmarks Greek business dictation across speech-to-text engines and small language models, via the Vercel AI Gateway.",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "selftest": "tsx src/lib/normalize.ts --self-test && tsx src/lib/metrics.ts --self-test",
+    "judgetest": "tsx src/lib/judge.ts --self-test",
+    "synth": "tsx src/corpus/synthesize.ts",
+    "synth:depts": "tsx src/corpus/synth-depts.ts",
+    "stage1": "tsx src/stage1-text-screen.ts",
+    "stage1b": "tsx src/stage1b-tasks.ts",
+    "stage2": "tsx src/stage2-stt.ts",
+    "stage3": "tsx src/stage3-pipeline.ts",
+    "r2:stt": "tsx src/round2-stt.ts",
+    "r2:llm": "tsx src/round2-llm.ts",
+    "report": "tsx src/report.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@ai-sdk/gateway": "^4.0.45",
+    "ai": "^7.0.57",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.23.11",
+    "typescript": "^5.7.2"
+  }
+}
