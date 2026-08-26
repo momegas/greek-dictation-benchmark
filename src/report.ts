@@ -25,7 +25,7 @@ import {
 } from "./lib/html";
 
 const RESULTS = `${BENCH_DIR}/results`;
-const OUT = `${BENCH_DIR}/greek-dictation.html`;
+const OUT = "report.html";
 
 type Row = Record<string, any>;
 

@@ -576,7 +576,7 @@ correct Greek thousands separator — 35000 becoming 35.000 — which is an impr
 judge rewards fluent, confident Greek and cannot see a changed figure, so where the two
 disagree the digit check is the one to trust. Judging is reproducible — identical verdicts
 across three runs at temperature 0 — and verified by
-<code>npm run bench:judgetest</code>.</p>
+<code>npm run judgetest</code>.</p>
 </div></div>
 
 <div class="band"><div class="wrap">
@@ -745,18 +745,18 @@ shortlist: 40 short utterances and 11 reasoning tasks. Every
 model response and judge verdict is cached by content hash, so a re-run after a scoring
 change costs nothing and returns identical numbers.</p>
 <pre><span class="c"># verify the Greek normalizer and metrics before trusting any number</span>
-npm run bench:selftest
-npm run bench:judgetest  <span class="c"># judge reproducibility + rubric discrimination</span>
-npm run bench:synth:depts <span class="c"># build the 100-passage department corpus</span>
-npm run bench:r2:stt      <span class="c"># round-two STT sweep (ELEVENLABS_API_KEY for Scribe)</span>
-npm run bench:r2:llm      <span class="c"># round-two language models + judge</span>
+npm run selftest
+npm run judgetest  <span class="c"># judge reproducibility + rubric discrimination</span>
+npm run synth:depts <span class="c"># build the 100-passage department corpus</span>
+npm run r2:stt      <span class="c"># round-two STT sweep (ELEVENLABS_API_KEY for Scribe)</span>
+npm run r2:llm      <span class="c"># round-two language models + judge</span>
 <span class="c"># round one, which produced the shortlist:</span>
-npm run bench:synth &amp;&amp; npm run bench:stage1 &amp;&amp; npm run bench:stage2
-npm run bench:report     <span class="c"># regenerate this page</span></pre>
+npm run synth &amp;&amp; npm run stage1 &amp;&amp; npm run stage2
+npm run report     <span class="c"># regenerate this page</span></pre>
 <p class="note">Raw per-utterance results, including every transcript and judge verdict,
 are in <code>bench/results/*.jsonl</code>.</p>
 </div></div>
 
 <footer><div class="wrap">Greek dictation benchmark · round two shortlist: 6 engines, 6 models ·
-judge openai/gpt-5.6-terra @ judge-v1 · generated 2026-08-25 15:03 UTC</div></footer>
+judge openai/gpt-5.6-terra @ judge-v1 · generated 2026-08-26 10:08 UTC</div></footer>
 </div>
